@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ya.Disk.Api", "Ya.Disk.Api\Ya.Disk.Api.csproj", "{1FB63F60-C78D-4D6C-AEB2-93150F213D1B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1FB63F60-C78D-4D6C-AEB2-93150F213D1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FB63F60-C78D-4D6C-AEB2-93150F213D1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FB63F60-C78D-4D6C-AEB2-93150F213D1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FB63F60-C78D-4D6C-AEB2-93150F213D1B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EF4361EE-F39A-4785-8A80-49C45DE334B8}
+	EndGlobalSection
+EndGlobal
