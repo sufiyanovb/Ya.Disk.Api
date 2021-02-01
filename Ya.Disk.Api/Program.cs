@@ -18,16 +18,13 @@ namespace Ya.Disk.Api
             .AddJsonFile("appsettings.json", true, true)
             .Build();
 
+            //foreach (var arg in args)
+            //{
+            //    Console.WriteLine(arg);
+            //}
 
 
             var yaDiskApi = new YaDiskApi(Configuration);
-
-
-            foreach (var arg in args)
-            {
-                Console.WriteLine(arg);
-            }
-
 
             var localDirectory = "";
             var folderYaDisk = "";
@@ -52,34 +49,32 @@ namespace Ya.Disk.Api
                         {
                             localDirectory = args[0];
                             folderYaDisk = args[1];
+
+                            if (!yaDiskApi.CheckInputtData(localDirectory, folderYaDisk))
+                            {
+                                Environment.Exit(0);
+                            }
                         }
                         break;
                     default:
-                        Console.WriteLine(@"параметры введены некорректно, пример: D:\test test");
+                        Console.WriteLine(@"параметры введены некорректно, пример: \""D:\test\"" \""test\""");
                         Environment.Exit(0);
                         break;
 
                 }
-
-                if (!yaDiskApi.CheckInputtData(localDirectory, folderYaDisk) && args.Length == 2)
-                {
-                    Environment.Exit(0);
-                }
-
 
                 if (!yaDiskApi.CheckInputtData(localDirectory, folderYaDisk))
                 {
                     continue;
                 }
 
-
-                var allFiles = Directory.GetFiles($"\"{localDirectory}\"");
+                var allFiles = Directory.GetFiles($"{localDirectory}");
 
                 var tasks = new List<Task<byte[]>>(allFiles.Length);
 
                 foreach (var item in allFiles)
                 {
-                    tasks.Add(Task.Run(() => yaDiskApi.UploadFileToYaDiskAsync($"\"{folderYaDisk}\"", $"\"{item}\"")));
+                    tasks.Add(Task.Run(() => yaDiskApi.UploadFileToYaDiskAsync($"{folderYaDisk}", $"{item}")));
                     Console.WriteLine($"В очередь на загрузку добавлен файл:{Path.GetFileName(item)}");
                 }
 

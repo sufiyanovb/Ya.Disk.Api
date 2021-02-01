@@ -54,14 +54,14 @@ namespace Ya.Disk.Api
 
             var responseObject = GetResponseObject<BaseResult>(urlForUploadFile, "Get");
 
-            var uri = new Uri(responseObject.href);
+            var uri = new Uri(responseObject.Href);
 
             using var client = new WebClient();
 
             client.UploadFileCompleted += (s, e) => { Console.WriteLine($"Файл : {Path.GetFileName(fullPathToFile)} загружен"); };
             client.UploadProgressChanged += (s, e) => { Console.WriteLine($"Файл : {Path.GetFileName(fullPathToFile)} загружается"); };
 
-            var file = await client.UploadFileTaskAsync(uri, responseObject.method, $"{fullPathToFile}");
+            var file = await client.UploadFileTaskAsync(uri, responseObject.Method, $"{fullPathToFile}");
 
             return file;
         }

@@ -1,7 +1,11 @@
-﻿namespace Ya.Disk.Api
+﻿using System.Text.Json.Serialization;
+
+namespace Ya.Disk.Api
 {
     public class UploadFileResult : BaseResult
     {
-        public string operation_id { get; set; }
+        [JsonPropertyName("operation_id")]
+
+        public string OperationId { get; set; }
     }
 }

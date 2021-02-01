@@ -1,9 +1,16 @@
-﻿namespace Ya.Disk.Api
+﻿using System.Text.Json.Serialization;
+
+namespace Ya.Disk.Api
 {
     public class BaseResult
     {
-        public string href { get; set; }
-        public string method { get; set; }
-        public bool templated { get; set; }
+        [JsonPropertyName("href")]
+        public string Href { get; set; }
+
+        [JsonPropertyName("method")]
+        public string Method { get; set; }
+
+        [JsonPropertyName("templated")]
+        public bool Templated { get; set; }
     }
 }
