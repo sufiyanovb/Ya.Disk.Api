@@ -5,7 +5,6 @@ using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-
 namespace Ya.Disk.Api
 {
     public class YaDiskApi
@@ -47,7 +46,6 @@ namespace Ya.Disk.Api
             return (CheckFolderYaDisk(folderYaDisk));
 
         }
-
         public async Task<byte[]> UploadFileToYaDiskAsync(string folderyaDisk, string fullPathToFile)
         {
             var urlForUploadFile = $"https://cloud-api.yandex.net/v1/disk/resources/upload?path=%2F{folderyaDisk}%2F{Path.GetFileName(fullPathToFile)}&overwrite=true";
@@ -65,11 +63,10 @@ namespace Ya.Disk.Api
 
             return file;
         }
-        public bool CheckFolderYaDisk(string folderName)
+        private bool CheckFolderYaDisk(string folderName)
         {
             try
             {
-
                 var urlToCreateFolder = $"https://cloud-api.yandex.net/v1/disk/resources?path=%2F{folderName}";
 
                 var responseObject = GetResponseObject<UploadFileResult>(urlToCreateFolder, "Put");
@@ -80,7 +77,9 @@ namespace Ya.Disk.Api
             {
                 var exceptionStatusCode = (int)((HttpWebResponse)ex.Response).StatusCode;
                 if (exceptionStatusCode == 409)//если папка уже существует
+                {
                     return true;
+                }
                 else
                 {
                     Console.WriteLine($"Ошибка:{ApiResponse.AllResponses[exceptionStatusCode]}");
@@ -108,7 +107,6 @@ namespace Ya.Disk.Api
             return JsonSerializer.Deserialize<T>(responseText);
         }
     }
-
 }
 
 

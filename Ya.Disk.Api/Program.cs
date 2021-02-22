@@ -4,27 +4,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-
 namespace Ya.Disk.Api
 {
     class Program
     {
 
-        public static IConfiguration Configuration;
-        static async Task Main(string[] args)
+        private static IConfiguration _configuration;
+
+        private static async Task Main(string[] args)
         {
 
-            Configuration = new ConfigurationBuilder()
+            _configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", true, true)
             .Build();
 
-            //foreach (var arg in args)
-            //{
-            //    Console.WriteLine(arg);
-            //}
-
-
-            var yaDiskApi = new YaDiskApi(Configuration);
+            var yaDiskApi = new YaDiskApi(_configuration);
 
             var localDirectory = "";
             var folderYaDisk = "";
