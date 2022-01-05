@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text.Json;
@@ -10,10 +11,13 @@ namespace Ya.Disk.Api
     public class YaDiskApi
     {
         private readonly IConfiguration _configuration;
+        private IProgress<KeyValuePair<string, string>> _progress;
 
-        public YaDiskApi(IConfiguration configuration)
+
+        public YaDiskApi(IConfiguration configuration, IProgress<KeyValuePair<string, string>> progress = null)
         {
             _configuration = configuration;
+            _progress=progress;
         }
 
         public bool CheckInputtData(string localDirectory, string folderYaDisk)
@@ -56,8 +60,8 @@ namespace Ya.Disk.Api
 
             using var client = new WebClient();
 
-            client.UploadFileCompleted += (s, e) => { Console.WriteLine($"Файл : {Path.GetFileName(fullPathToFile)} загружен"); };
-            client.UploadProgressChanged += (s, e) => { Console.WriteLine($"Файл : {Path.GetFileName(fullPathToFile)} загружается"); };
+            client.UploadProgressChanged += (s, e) => { _progress?.Report(new KeyValuePair<string, string>(Path.GetFileName(fullPathToFile), "загружается")); };
+            client.UploadFileCompleted += (s, e) => { _progress?.Report(new KeyValuePair<string, string>(Path.GetFileName(fullPathToFile), "загружен")); };
 
             var file = await client.UploadFileTaskAsync(uri, responseObject.Method, $"{fullPathToFile}");
 
