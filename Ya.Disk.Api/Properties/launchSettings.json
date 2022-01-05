@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Ya.Disk.Api": {
-      "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\Булат Камилович\\source\\repos\\Ya.Disk.Api\\Ya.Disk.Api\\bin\\Debug\" test"
+      "commandName": "Project"
     }
   }
 }

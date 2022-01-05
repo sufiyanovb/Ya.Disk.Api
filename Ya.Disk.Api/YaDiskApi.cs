@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -11,10 +11,10 @@ namespace Ya.Disk.Api
     public class YaDiskApi
     {
         private readonly IConfiguration _configuration;
-        private IProgress<KeyValuePair<string, string>> _progress;
+        private readonly IProgress<string> _progress;
 
 
-        public YaDiskApi(IConfiguration configuration, IProgress<KeyValuePair<string, string>> progress = null)
+        public YaDiskApi(IConfiguration configuration, IProgress<string> progress = null)
         {
             _configuration = configuration;
             _progress=progress;
@@ -50,22 +50,30 @@ namespace Ya.Disk.Api
             return (CheckFolderYaDisk(folderYaDisk));
 
         }
-        public async Task<byte[]> UploadFileToYaDiskAsync(string folderyaDisk, string fullPathToFile)
+        public async Task<bool> UploadFileToYaDiskAsync(string folderyaDisk, string fullPathToFile)
         {
             var urlForUploadFile = $"https://cloud-api.yandex.net/v1/disk/resources/upload?path=%2F{folderyaDisk}%2F{Path.GetFileName(fullPathToFile)}&overwrite=true";
 
             var responseObject = GetResponseObject<BaseResult>(urlForUploadFile, "Get");
 
-            var uri = new Uri(responseObject.Href);
+            using FileStream file = new FileStream(fullPathToFile, FileMode.Open, FileAccess.Read);
+            using HttpContent filePathContent = new StringContent(fullPathToFile);
+            using HttpContent fileStreamContent = new StreamContent(file);
+            using var client = new HttpClient();
+            using var formData = new MultipartFormDataContent
+            {
+                { filePathContent, "filepath" },
+                { fileStreamContent, "file", Path.GetFileName(fullPathToFile) }
+            };
 
-            using var client = new WebClient();
+            _progress?.Report($"Файл: {Path.GetFileName(fullPathToFile)} загружается");
 
-            client.UploadProgressChanged += (s, e) => { _progress?.Report(new KeyValuePair<string, string>(Path.GetFileName(fullPathToFile), "загружается")); };
-            client.UploadFileCompleted += (s, e) => { _progress?.Report(new KeyValuePair<string, string>(Path.GetFileName(fullPathToFile), "загружен")); };
+            HttpResponseMessage response = await client.PostAsync(responseObject.Href, formData);
 
-            var file = await client.UploadFileTaskAsync(uri, responseObject.Method, $"{fullPathToFile}");
+            _progress?.Report($"Файл: {Path.GetFileName(fullPathToFile)} {(response.IsSuccessStatusCode ? "" : " не ")} загружен");
 
-            return file;
+            return response.IsSuccessStatusCode;
+
         }
         private bool CheckFolderYaDisk(string folderName)
         {

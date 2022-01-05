@@ -1,7 +1,6 @@
 ﻿
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -11,15 +10,12 @@ namespace Ya.Disk.Api
     class Program
     {
         private static IConfiguration _configuration;
-        private static readonly ConcurrentDictionary<string, string> _cdProgress = new ConcurrentDictionary<string, string>();
 
         private static async Task Main(string[] args)
         {
-            var _progress = new Progress<KeyValuePair<string, string>>((i) =>
+            var _progress = new Progress<string>((i) =>
             {
-                _cdProgress.AddOrUpdate(i.Key, i.Value, (Key, Value) => i.Value);
-
-                Console.WriteLine($"Файл {i.Key} состояние: {_cdProgress[i.Key]}");
+                Console.WriteLine($"{i}");
             });
 
             _configuration = new ConfigurationBuilder()
@@ -74,7 +70,7 @@ namespace Ya.Disk.Api
 
                 var allFiles = Directory.GetFiles($"{localDirectory}");
 
-                var tasks = new List<Task<byte[]>>(allFiles.Length);
+                var tasks = new List<Task<bool>>(allFiles.Length);
 
 
                 foreach (var item in allFiles)
