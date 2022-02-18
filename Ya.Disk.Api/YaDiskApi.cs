@@ -13,6 +13,9 @@ namespace Ya.Disk.Api
         private readonly IConfiguration _configuration;
         private readonly IProgress<string> _progress;
 
+        public delegate void ErrorMessageDelegate(string msg);
+        public event ErrorMessageDelegate ErrorMessageHandler;
+
 
         public YaDiskApi(IConfiguration configuration, IProgress<string> progress = null)
         {
@@ -20,34 +23,34 @@ namespace Ya.Disk.Api
             _progress=progress;
         }
 
+
         public bool CheckInputtData(string localDirectory, string folderYaDisk)
         {
             if (string.IsNullOrWhiteSpace(folderYaDisk))
             {
-                Console.WriteLine("Не введена директория на Яндекс.Диске!");
+                ErrorMessageHandler?.Invoke("Не введена директория на Яндекс.Диске!");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(localDirectory))
             {
-                Console.WriteLine("Не введена локальная директория!");
+                ErrorMessageHandler?.Invoke("Не введена локальная директория!");
                 return false;
             }
 
             if (!Directory.Exists(localDirectory))
             {
-                Console.WriteLine("Введенной локальной папки не существует!");
+                ErrorMessageHandler?.Invoke("Введенной локальной папки не существует!");
                 return false;
-
             }
 
             if (Directory.GetFiles(localDirectory).Length == 0)
             {
-                Console.WriteLine("В локальной папке отсутствуют файлы!");
+                ErrorMessageHandler?.Invoke("В локальной папке отсутствуют файлы!");
                 return false;
             }
 
-            return (CheckFolderYaDisk(folderYaDisk));
+            return CheckFolderYaDisk(folderYaDisk);
 
         }
         public async Task<bool> UploadFileToYaDiskAsync(string folderyaDisk, string fullPathToFile)

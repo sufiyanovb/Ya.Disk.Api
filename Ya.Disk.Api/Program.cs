@@ -24,6 +24,8 @@ namespace Ya.Disk.Api
 
             var yaDiskApi = new YaDiskApi(_configuration, _progress);
 
+            yaDiskApi.ErrorMessageHandler+=(string msg) => { Console.WriteLine(msg); };
+
             var localDirectory = "";
             var folderYaDisk = "";
 
