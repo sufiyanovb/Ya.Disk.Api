@@ -97,13 +97,13 @@ namespace Ya.Disk.Api
                 }
                 else
                 {
-                    Console.WriteLine($"Ошибка:{ApiResponse.AllResponses[exceptionStatusCode]}");
+                    ErrorMessageHandler?.Invoke($"Ошибка:{ApiResponse.AllResponses[exceptionStatusCode]}");
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{ex.Message}");
+                ErrorMessageHandler?.Invoke($"{ex.Message}");
                 return false;
             }
         }
