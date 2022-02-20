@@ -13,9 +13,7 @@ namespace Ya.Disk.Api
         private readonly IConfiguration _configuration;
         private readonly IProgress<string> _progress;
 
-        public delegate void ErrorMessageDelegate(string msg);
-        public event ErrorMessageDelegate ErrorMessageHandler;
-
+        public event Action<string> ErrorMessageHandler;
 
         public YaDiskApi(IConfiguration configuration, IProgress<string> progress = null)
         {
