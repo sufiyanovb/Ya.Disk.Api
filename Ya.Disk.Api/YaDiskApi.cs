@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Ya.Disk.Api
 {
@@ -12,15 +14,17 @@ namespace Ya.Disk.Api
     {
         private readonly IConfiguration _configuration;
         private readonly IProgress<string> _progress;
+        private readonly Dictionary<int, string> _apiResponses;
 
         public event Action<string> ErrorMessageHandler;
 
         public YaDiskApi(IConfiguration configuration, IProgress<string> progress = null)
         {
             _configuration = configuration;
-            _progress=progress;
-        }
+            _progress = progress;
+            _apiResponses = _configuration.GetSection("ApiResponses").GetChildren().ToDictionary(i => int.Parse(i.Key), i => i.Value);
 
+        }
 
         public bool CheckInputtData(string localDirectory, string folderYaDisk)
         {
@@ -95,7 +99,7 @@ namespace Ya.Disk.Api
                 }
                 else
                 {
-                    ErrorMessageHandler?.Invoke($"Ошибка:{ApiResponse.AllResponses[exceptionStatusCode]}");
+                    ErrorMessageHandler?.Invoke($"Ошибка:{_apiResponses[exceptionStatusCode]}");
                     return false;
                 }
             }
