@@ -2,7 +2,7 @@
 
 namespace Ya.Disk.Api
 {
-    public class BaseResult
+    public class BaseResult 
     {
         [JsonPropertyName("href")]
         public string Href { get; set; }
@@ -14,3 +14,8 @@ namespace Ya.Disk.Api
         public bool Templated { get; set; }
     }
 }
+
+
+
+
+

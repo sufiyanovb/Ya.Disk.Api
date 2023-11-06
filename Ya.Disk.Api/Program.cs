@@ -24,7 +24,7 @@ namespace Ya.Disk.Api
 
             var yaDiskApi = new YaDiskApi(_configuration, _progress);
 
-            yaDiskApi.ErrorMessageHandler+=(string msg) => { Console.WriteLine(msg); };
+            yaDiskApi.ErrorMessageHandler += (string msg) => { Console.WriteLine(msg); };
 
             var localDirectory = "";
             var folderYaDisk = "";
@@ -50,7 +50,7 @@ namespace Ya.Disk.Api
                             localDirectory = args[0];
                             folderYaDisk = args[1];
 
-                            if (!yaDiskApi.CheckInputtData(localDirectory, folderYaDisk))
+                            if (!await yaDiskApi.CheckInputtDataAsync(localDirectory, folderYaDisk))
                             {
                                 Environment.Exit(0);
                             }
@@ -63,7 +63,7 @@ namespace Ya.Disk.Api
 
                 }
 
-                if (!yaDiskApi.CheckInputtData(localDirectory, folderYaDisk))
+                if (!await yaDiskApi.CheckInputtDataAsync(localDirectory, folderYaDisk))
                 {
                     continue;
                 }
@@ -77,7 +77,7 @@ namespace Ya.Disk.Api
 
                 foreach (var item in allFiles)
                 {
-                    tasks.Add(Task.Run(() => yaDiskApi.UploadFileToYaDiskAsync($"{folderYaDisk}", $"{item}")));
+                    tasks.Add(Task.Run( () =>  yaDiskApi.UploadFileToYaDiskAsync($"{folderYaDisk}", $"{item}")));
                     Console.WriteLine($"В очередь на загрузку добавлен файл:{Path.GetFileName(item)}");
                 }
 

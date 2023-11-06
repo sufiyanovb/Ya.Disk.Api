@@ -5,8 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
+using System.Net.Http.Headers;
 
 namespace Ya.Disk.Api
 {
@@ -14,7 +13,6 @@ namespace Ya.Disk.Api
     {
         private readonly IConfiguration _configuration;
         private readonly IProgress<string> _progress;
-        private readonly Dictionary<int, string> _apiResponses;
 
         public event Action<string> ErrorMessageHandler;
 
@@ -22,11 +20,9 @@ namespace Ya.Disk.Api
         {
             _configuration = configuration;
             _progress = progress;
-            _apiResponses = _configuration.GetSection("ApiResponses").GetChildren().ToDictionary(i => int.Parse(i.Key), i => i.Value);
-
         }
 
-        public bool CheckInputtData(string localDirectory, string folderYaDisk)
+        public async Task<bool> CheckInputtDataAsync(string localDirectory, string folderYaDisk)
         {
             if (string.IsNullOrWhiteSpace(folderYaDisk))
             {
@@ -52,19 +48,24 @@ namespace Ya.Disk.Api
                 return false;
             }
 
-            return CheckFolderYaDisk(folderYaDisk);
+            return await CheckFolderYaDiskAsync(folderYaDisk);
 
         }
         public async Task<bool> UploadFileToYaDiskAsync(string folderyaDisk, string fullPathToFile)
         {
             var urlForUploadFile = $"https://cloud-api.yandex.net/v1/disk/resources/upload?path=%2F{folderyaDisk}%2F{Path.GetFileName(fullPathToFile)}&overwrite=true";
 
-            var responseObject = GetResponseObject<BaseResult>(urlForUploadFile, "Get");
+            var responseMessage = await GetAsync(urlForUploadFile);
+
+            var responseContent = await responseMessage.Content.ReadAsStringAsync();
+
+            var responseJson = JsonSerializer.Deserialize<UploadFileResult>(responseContent);
 
             using FileStream file = new FileStream(fullPathToFile, FileMode.Open, FileAccess.Read);
             using HttpContent filePathContent = new StringContent(fullPathToFile);
             using HttpContent fileStreamContent = new StreamContent(file);
             using var client = new HttpClient();
+
             using var formData = new MultipartFormDataContent
             {
                 { filePathContent, "filepath" },
@@ -73,55 +74,43 @@ namespace Ya.Disk.Api
 
             _progress?.Report($"Файл: {Path.GetFileName(fullPathToFile)} загружается");
 
-            HttpResponseMessage response = await client.PostAsync(responseObject.Href, formData);
+            HttpResponseMessage response = await client.PostAsync(responseJson.Href, formData);
 
             _progress?.Report($"Файл: {Path.GetFileName(fullPathToFile)} {(response.IsSuccessStatusCode ? "" : " не ")} загружен");
 
             return response.IsSuccessStatusCode;
 
         }
-        private bool CheckFolderYaDisk(string folderName)
+        private async Task<bool> CheckFolderYaDiskAsync(string folderName)
         {
-            try
-            {
-                var urlToCreateFolder = $"https://cloud-api.yandex.net/v1/disk/resources?path=%2F{folderName}";
+            var urlToCreateFolder = $"https://cloud-api.yandex.net/v1/disk/resources?path=%2F{folderName}";
 
-                var responseObject = GetResponseObject<UploadFileResult>(urlToCreateFolder, "Put");
+            var responseMessage = await PutAsync(urlToCreateFolder);
 
-                return true;
-            }
-            catch (WebException ex)
+            return responseMessage.StatusCode == HttpStatusCode.Conflict || responseMessage.StatusCode == HttpStatusCode.Created;//если папка уже создана или уже существует
+
+        }
+
+        public async Task<HttpResponseMessage> PutAsync(string url)
+        {
+            using (HttpClient client = new HttpClient())
             {
-                var exceptionStatusCode = (int)((HttpWebResponse)ex.Response).StatusCode;
-                if (exceptionStatusCode == 409)//если папка уже существует
-                {
-                    return true;
-                }
-                else
-                {
-                    ErrorMessageHandler?.Invoke($"Ошибка:{_apiResponses[exceptionStatusCode]}");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorMessageHandler?.Invoke($"{ex.Message}");
-                return false;
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", $"{_configuration["token"]}");
+
+                return await client.PutAsync(url, new StringContent(""));
             }
         }
-        private T GetResponseObject<T>(string url, string httpMethod)
+
+        public async Task<HttpResponseMessage> GetAsync(string url)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.Method = httpMethod;
-            request.Accept = "application/json";
-            request.Headers["Authorization"] = $"OAuth {_configuration["token"]}";
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", $"{_configuration["token"]}");
 
-            using HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            using Stream responseStream = response.GetResponseStream();
-            using StreamReader reader = new StreamReader(responseStream);
-            var responseText = reader.ReadToEnd();
-
-            return JsonSerializer.Deserialize<T>(responseText);
+                return await client.GetAsync(url);
+            }
         }
     }
 }
