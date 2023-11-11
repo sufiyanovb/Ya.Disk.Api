@@ -57,9 +57,9 @@ namespace Ya.Disk.Api
 
             var responseMessage = await GetAsync(urlForUploadFile);
 
-            var responseContent = await responseMessage.Content.ReadAsStringAsync();
+            var responseStream = await responseMessage.Content.ReadAsStreamAsync();
 
-            var responseJson = JsonSerializer.Deserialize<UploadFileResult>(responseContent);
+            var responseJson = await JsonSerializer.DeserializeAsync<UploadFileResult>(responseStream);
 
             using FileStream file = new FileStream(fullPathToFile, FileMode.Open, FileAccess.Read);
             using HttpContent filePathContent = new StringContent(fullPathToFile);
@@ -83,7 +83,7 @@ namespace Ya.Disk.Api
         }
         private async Task<bool> CheckFolderYaDiskAsync(string folderName)
         {
-            var urlToCreateFolder = $"https://cloud-api.yandex.net/v1/disk/resources?path=%2F{folderName}";
+            var urlToCreateFolder = $"https://cloud-api.yandex.net/v1/disk/resources/?path=%2F{folderName}";
 
             var responseMessage = await PutAsync(urlToCreateFolder);
 
