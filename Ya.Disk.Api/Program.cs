@@ -77,7 +77,7 @@ namespace Ya.Disk.Api
 
                 foreach (var item in allFiles)
                 {
-                    tasks.Add(Task.Run( () =>  yaDiskApi.UploadFileToYaDiskAsync($"{folderYaDisk}", $"{item}")));
+                    tasks.Add(Task.Run(() => yaDiskApi.UploadFileToYaDiskAsync($"{folderYaDisk}", $"{item}")));
                     Console.WriteLine($"В очередь на загрузку добавлен файл:{Path.GetFileName(item)}");
                 }
 

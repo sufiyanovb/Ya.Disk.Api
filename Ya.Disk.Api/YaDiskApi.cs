@@ -91,25 +91,25 @@ namespace Ya.Disk.Api
 
         }
 
-        public async Task<HttpResponseMessage> PutAsync(string url)
+        public Task<HttpResponseMessage> PutAsync(string url)
         {
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", $"{_configuration["token"]}");
 
-                return await client.PutAsync(url, new StringContent(""));
+                return client.PutAsync(url, new StringContent(""));
             }
         }
 
-        public async Task<HttpResponseMessage> GetAsync(string url)
+        public Task<HttpResponseMessage> GetAsync(string url)
         {
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", $"{_configuration["token"]}");
 
-                return await client.GetAsync(url);
+                return client.GetAsync(url);
             }
         }
     }
